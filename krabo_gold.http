@@ -1,0 +1,6 @@
+@krabo_gold_HostAddress = http://localhost:5040
+
+GET {{krabo_gold_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
