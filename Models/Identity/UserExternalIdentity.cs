@@ -1,4 +1,3 @@
-using krabo_gold.Models.Identity;
 
 namespace krabo_gold.Models.Identity;
 
@@ -10,14 +9,11 @@ public class UserExternalIdentity
 
     public AppUser User { get; set; } = null!;
 
-
     public ExternalSystem ExternalSystem { get; set; }
-
 
     public string ExternalUserId { get; set; } = null!;
 
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
-    public DateTime CreatedAt { get; set; }
-
-    public DateTime UpdatedAt { get; set; }
+    public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 }

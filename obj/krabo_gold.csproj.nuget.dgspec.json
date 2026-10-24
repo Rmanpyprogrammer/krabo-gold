@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "/home/arman/C#/krabo_gold/krabo-gold/krabo_gold.csproj": {}
+    "/home/arman/C#/krabo_gold/api-gateway/krabo_gold.csproj": {}
   },
   "projects": {
-    "/home/arman/C#/krabo_gold/krabo-gold/krabo_gold.csproj": {
+    "/home/arman/C#/krabo_gold/api-gateway/krabo_gold.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/home/arman/C#/krabo_gold/krabo-gold/krabo_gold.csproj",
+        "projectUniqueName": "/home/arman/C#/krabo_gold/api-gateway/krabo_gold.csproj",
         "projectName": "krabo_gold",
-        "projectPath": "/home/arman/C#/krabo_gold/krabo-gold/krabo_gold.csproj",
+        "projectPath": "/home/arman/C#/krabo_gold/api-gateway/krabo_gold.csproj",
         "packagesPath": "/home/arman/.nuget/packages/",
-        "outputPath": "/home/arman/C#/krabo_gold/krabo-gold/obj/",
+        "outputPath": "/home/arman/C#/krabo_gold/api-gateway/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "/home/arman/.nuget/NuGet/NuGet.Config"
@@ -46,6 +46,18 @@
           "framework": "net10.0",
           "targetAlias": "net10.0",
           "dependencies": {
+            "Hangfire.AspNetCore": {
+              "target": "Package",
+              "version": "[1.8.25, )"
+            },
+            "Hangfire.PostgreSql": {
+              "target": "Package",
+              "version": "[1.21.1, )"
+            },
+            "Microsoft.AspNetCore.Authentication.JwtBearer": {
+              "target": "Package",
+              "version": "[10.0.13, )"
+            },
             "Microsoft.AspNetCore.Identity.EntityFrameworkCore": {
               "target": "Package",
               "version": "[10.0.11, )"
@@ -70,9 +82,25 @@
               "target": "Package",
               "version": "[10.0.11, )"
             },
+            "Microsoft.IdentityModel.Tokens": {
+              "target": "Package",
+              "version": "[8.19.2, )"
+            },
+            "Microsoft.OpenApi": {
+              "target": "Package",
+              "version": "[2.7.5, )"
+            },
             "Npgsql.EntityFrameworkCore.PostgreSQL": {
               "target": "Package",
               "version": "[10.0.3, )"
+            },
+            "StackExchange.Redis": {
+              "target": "Package",
+              "version": "[3.4.5, )"
+            },
+            "Swashbuckle.AspNetCore": {
+              "target": "Package",
+              "version": "[10.3.0, )"
             }
           },
           "imports": [

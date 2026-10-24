@@ -1,18 +1,16 @@
+
 using krabo_gold.Models.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace krabo_gold.Data.Configurations;
 
-public class AppUserConfiguration
-    : IEntityTypeConfiguration<AppUser>
+public class AppUserConfiguration : IEntityTypeConfiguration<AppUser>
 {
-    public void Configure(
-        EntityTypeBuilder<AppUser> builder
-    )
+    public void Configure(EntityTypeBuilder<AppUser> builder)
     {
         builder.Property(x => x.Name)
-            .HasMaxLength(40);
+            .HasMaxLength(100);
 
         builder.Property(x => x.NationalCode)
             .HasMaxLength(10);
@@ -25,6 +23,10 @@ public class AppUserConfiguration
 
         builder.Property(x => x.IsActive)
             .HasDefaultValue(true);
+
+        builder.HasIndex(x => x.PhoneNumber)
+            .IsUnique()
+            .HasFilter("\"PhoneNumber\" IS NOT NULL");
 
         builder.HasIndex(x => x.NationalCode)
             .IsUnique()

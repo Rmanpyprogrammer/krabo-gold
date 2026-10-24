@@ -18,6 +18,8 @@ public class ApplicationDbContext
     {
     }
 
+    public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
+
     public DbSet<UserExternalIdentity>
         UserExternalIdentities
         => Set<UserExternalIdentity>();
