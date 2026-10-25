@@ -24,4 +24,11 @@ public sealed class VerifyOtpDto
 }
 
 public sealed record AuthResponse(string AccessToken, string TokenType, int ExpiresInSeconds, string UserId, string? Name, string Mobile);
+
+public sealed record RegistrationRequiredResponse(
+    bool RequiresRegistration,
+    string RegistrationToken,
+    int RegistrationExpiresInSeconds,
+    string Mobile);
+
 public sealed record MessageResponse(string Message);

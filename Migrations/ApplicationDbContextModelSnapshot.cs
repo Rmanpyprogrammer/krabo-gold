@@ -327,6 +327,64 @@ namespace krabo_gold.Migrations
                     b.ToTable("RolePermissions", (string)null);
                 });
 
+            modelBuilder.Entity("krabo_gold.Models.Identity.UserAddress", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("AddressLine")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<string>("City")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsDefault")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Plaque")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<string>("PostalCode")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)");
+
+                    b.Property<string>("Province")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<string>("Unit")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("UserAddresses", (string)null);
+                });
+
             modelBuilder.Entity("krabo_gold.Models.Identity.UserExternalIdentity", b =>
                 {
                     b.Property<Guid>("Id")
@@ -441,6 +499,17 @@ namespace krabo_gold.Migrations
                     b.Navigation("Role");
                 });
 
+            modelBuilder.Entity("krabo_gold.Models.Identity.UserAddress", b =>
+                {
+                    b.HasOne("krabo_gold.Models.Identity.AppUser", "User")
+                        .WithMany("Addresses")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("krabo_gold.Models.Identity.UserExternalIdentity", b =>
                 {
                     b.HasOne("krabo_gold.Models.Identity.AppUser", "User")
@@ -459,6 +528,8 @@ namespace krabo_gold.Migrations
 
             modelBuilder.Entity("krabo_gold.Models.Identity.AppUser", b =>
                 {
+                    b.Navigation("Addresses");
+
                     b.Navigation("ExternalIdentities");
                 });
 

@@ -9,7 +9,7 @@ namespace krabo_gold.Services.Auth;
 
 public sealed class OtpOptions
 {
-    public int LifetimeSeconds { get; set; } = 180;
+    public int LifetimeSeconds { get; set; } = 60;
     public int MaxAttempts { get; set; } = 5;
     public int PhoneRequestsPerWindow { get; set; } = 3;
     public int IpRequestsPerWindow { get; set; } = 10;

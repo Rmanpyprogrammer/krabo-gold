@@ -6,7 +6,8 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using StackExchange.Redis; 
+using Microsoft.OpenApi;
+using StackExchange.Redis;
 using Hangfire;
 using Hangfire.PostgreSql;
 using Hangfire.Dashboard;
@@ -19,9 +20,39 @@ using krabo_gold.Services.Gateway;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
-builder.Services.AddSwaggerGen();
+
+
+// ---------------------------------------------------------
+// Swagger + JWT Bearer
+// ---------------------------------------------------------
+builder.Services.AddSwaggerGen(options =>
+{
+    options.AddSecurityDefinition("bearer", new OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = SecuritySchemeType.Http,
+        Scheme = "bearer",
+        BearerFormat = "JWT",
+        In = ParameterLocation.Header,
+        Description = "JWT Access Token"
+    });
+
+    options.AddSecurityRequirement(document =>
+        new OpenApiSecurityRequirement
+        {
+            [new OpenApiSecuritySchemeReference(
+                "bearer",
+                document
+            )] = []
+        });
+});
+
 builder.Services.AddOpenApi();
 
+
+// ---------------------------------------------------------
+// SMS - SabaNovin
+// ---------------------------------------------------------
 builder.Services.Configure<SabaNovinOptions>(
     builder.Configuration.GetSection("Sms:SabaNovin"));
 
@@ -32,8 +63,9 @@ builder.Services.AddHttpClient<ISmsSender, SabaNovinSmsSender>(
     });
 
 
-
+// ---------------------------------------------------------
 // PostgreSQL
+// ---------------------------------------------------------
 var connectionString = builder.Configuration
     .GetConnectionString("DefaultConnection");
 
@@ -43,23 +75,29 @@ if (string.IsNullOrWhiteSpace(connectionString))
         "DefaultConnection is not configured.");
 }
 
-//hangfire
+
+// ---------------------------------------------------------
+// Hangfire
+// ---------------------------------------------------------
 builder.Services.AddHangfire(config =>
     config.UsePostgreSqlStorage(options =>
         options.UseNpgsqlConnection(
-            builder.Configuration.GetConnectionString("DefaultConnection"))));
+            builder.Configuration.GetConnectionString(
+                "DefaultConnection"))));
 
 builder.Services.AddHangfireServer();
 
 
-
-
-
-
+// ---------------------------------------------------------
+// Entity Framework
+// ---------------------------------------------------------
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(connectionString));
 
+
+// ---------------------------------------------------------
 // Identity
+// ---------------------------------------------------------
 builder.Services
     .AddIdentity<AppUser, AppRole>(options =>
     {
@@ -79,7 +117,10 @@ builder.Services
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
 
+
+// ---------------------------------------------------------
 // JWT
+// ---------------------------------------------------------
 var jwt = builder.Configuration.GetSection("Jwt");
 
 var jwtKey = jwt["Key"];
@@ -125,11 +166,16 @@ builder.Services
             };
     });
 
+
+// ---------------------------------------------------------
 // Authorization
+// ---------------------------------------------------------
 builder.Services.AddAuthorization();
 
 
+// ---------------------------------------------------------
 // Redis
+// ---------------------------------------------------------
 var redisSection = builder.Configuration.GetSection("Redis");
 
 var redisHost = redisSection["Host"];
@@ -153,18 +199,49 @@ var redisOptions = new ConfigurationOptions
     Password = redisPassword
 };
 
-redisOptions.EndPoints.Add(redisHost, redisPort.Value);
+redisOptions.EndPoints.Add(
+    redisHost,
+    redisPort.Value
+);
 
 builder.Services.AddSingleton<IConnectionMultiplexer>(
     _ => ConnectionMultiplexer.Connect(redisOptions));
 
-builder.Services.AddScoped<ICaptchaService, CaptchaService>();
-builder.Services.Configure<OtpOptions>(builder.Configuration.GetSection("Otp"));
-builder.Services.AddScoped<IOtpService, OtpService>();
-builder.Services.AddScoped<TokenService>();
-builder.Services.AddHttpClient("GatewayBackend", client => client.Timeout = TimeSpan.FromSeconds(30));
 
-//cors
+// ---------------------------------------------------------
+// Application Services
+// ---------------------------------------------------------
+builder.Services.AddScoped<ICaptchaService, CaptchaService>();
+
+builder.Services.Configure<OtpOptions>(
+    builder.Configuration.GetSection("Otp"));
+
+builder.Services.AddScoped<IOtpService, OtpService>();
+
+builder.Services.Configure<RegistrationOptions>(
+    builder.Configuration.GetSection("Registration"));
+
+builder.Services.AddScoped<
+    IRegistrationSessionService,
+    RegistrationSessionService>();
+
+builder.Services.AddScoped<TokenService>();
+
+
+// ---------------------------------------------------------
+// Gateway Backend HttpClient
+// ---------------------------------------------------------
+builder.Services.AddHttpClient(
+    "GatewayBackend",
+    client =>
+    {
+        client.Timeout = TimeSpan.FromSeconds(30);
+    });
+
+
+// ---------------------------------------------------------
+// CORS
+// ---------------------------------------------------------
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("Frontend", policy =>
@@ -177,74 +254,127 @@ builder.Services.AddCors(options =>
     });
 });
 
+
+// =========================================================
+// Build Application
+// =========================================================
 var app = builder.Build();
+
+
+// ---------------------------------------------------------
+// Custom Middlewares
+// ---------------------------------------------------------
 app.UseMiddleware<SecurityHeadersMiddleware>();
 app.UseMiddleware<GlobalRateLimitMiddleware>();
 
-var hangfireUsername = builder.Configuration["HangfireDashboard:Username"];
-var hangfirePassword = builder.Configuration["HangfireDashboard:Password"];
+
+// ---------------------------------------------------------
+// Hangfire Dashboard Auth
+// ---------------------------------------------------------
+var hangfireUsername =
+    builder.Configuration["HangfireDashboard:Username"];
+
+var hangfirePassword =
+    builder.Configuration["HangfireDashboard:Password"];
 
 if (string.IsNullOrWhiteSpace(hangfireUsername) ||
     string.IsNullOrWhiteSpace(hangfirePassword))
 {
-    throw new Exception("Hangfire dashboard username/password is not configured.");
+    throw new Exception(
+        "Hangfire dashboard username/password is not configured.");
 }
 
-app.UseHangfireDashboard("/hangfire", new DashboardOptions
-{
-    Authorization = new[]
+app.UseHangfireDashboard(
+    "/hangfire",
+    new DashboardOptions
     {
-        new HangfireBasicAuthFilter(
-            hangfireUsername,
-            hangfirePassword
-        )
-    }
+        Authorization = new[]
+        {
+            new HangfireBasicAuthFilter(
+                hangfireUsername,
+                hangfirePassword
+            )
+        }
+    });
+
+
+// ---------------------------------------------------------
+// Swagger
+// ---------------------------------------------------------
+app.UseSwagger();
+
+app.UseSwaggerUI(options =>
+{
+    // Authorization بعد از refresh صفحه Swagger باقی می‌ماند
+    options.EnablePersistAuthorization();
 });
 
-app.UseSwagger();
-app.UseSwaggerUI();
 
+// ---------------------------------------------------------
+// Database Migration + Seeder
+// ---------------------------------------------------------
 using (var scope = app.Services.CreateScope())
 {
-    var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    var db = scope.ServiceProvider
+        .GetRequiredService<ApplicationDbContext>();
+
     await db.Database.MigrateAsync();
 
-    await DbSeeder.SeedAdminAsync(scope.ServiceProvider);
-
+    await DbSeeder.SeedAdminAsync(
+        scope.ServiceProvider
+    );
 }
 
 
-
-
-
-
-
-
+// ---------------------------------------------------------
+// OpenAPI - Development
+// ---------------------------------------------------------
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
 }
 
+
+// ---------------------------------------------------------
+// HTTP Pipeline
+// ---------------------------------------------------------
 app.UseHttpsRedirection();
 
 app.UseRouting();
+
 app.UseCors("Frontend");
 
+
+// مهم: Authentication باید قبل Authorization باشد
 app.UseAuthentication();
 app.UseAuthorization();
 
+
+// ---------------------------------------------------------
+// Controllers
+// ---------------------------------------------------------
 app.MapControllers();
 
+
+// ---------------------------------------------------------
+// Health / Root Endpoint
+// ---------------------------------------------------------
 app.MapGet("/", () => Results.Ok(new
 {
     service = "krabo_gold",
     status = "running"
-})).AllowAnonymous();
+}))
+.AllowAnonymous();
+
 
 app.Run();
 
 
-public class HangfireBasicAuthFilter : IDashboardAuthorizationFilter
+// =========================================================
+// Hangfire Basic Authentication
+// =========================================================
+public class HangfireBasicAuthFilter
+    : IDashboardAuthorizationFilter
 {
     private readonly string _username;
     private readonly string _password;
@@ -258,15 +388,24 @@ public class HangfireBasicAuthFilter : IDashboardAuthorizationFilter
         _password = password;
     }
 
-    public bool Authorize(DashboardContext context)
+    public bool Authorize(
+        DashboardContext context
+    )
     {
-        var httpContext = context.GetHttpContext();
+        var httpContext =
+            context.GetHttpContext();
 
         var authorizationHeader =
-            httpContext.Request.Headers.Authorization.ToString();
+            httpContext.Request
+                .Headers
+                .Authorization
+                .ToString();
 
-        if (string.IsNullOrWhiteSpace(authorizationHeader) ||
-            !authorizationHeader.StartsWith("Basic ", StringComparison.OrdinalIgnoreCase))
+        if (string.IsNullOrWhiteSpace(
+                authorizationHeader) ||
+            !authorizationHeader.StartsWith(
+                "Basic ",
+                StringComparison.OrdinalIgnoreCase))
         {
             Challenge(httpContext);
             return false;
@@ -274,15 +413,21 @@ public class HangfireBasicAuthFilter : IDashboardAuthorizationFilter
 
         try
         {
-            var encodedCredentials = authorizationHeader
-                .Substring("Basic ".Length)
-                .Trim();
+            var encodedCredentials =
+                authorizationHeader
+                    .Substring("Basic ".Length)
+                    .Trim();
 
-            var credentialBytes = Convert.FromBase64String(encodedCredentials);
+            var credentialBytes =
+                Convert.FromBase64String(
+                    encodedCredentials);
 
-            var credentials = Encoding.UTF8.GetString(credentialBytes);
+            var credentials =
+                Encoding.UTF8.GetString(
+                    credentialBytes);
 
-            var separatorIndex = credentials.IndexOf(':');
+            var separatorIndex =
+                credentials.IndexOf(':');
 
             if (separatorIndex <= 0)
             {
@@ -290,26 +435,38 @@ public class HangfireBasicAuthFilter : IDashboardAuthorizationFilter
                 return false;
             }
 
-            var username = credentials.Substring(0, separatorIndex);
-            var password = credentials.Substring(separatorIndex + 1);
+            var username =
+                credentials.Substring(
+                    0,
+                    separatorIndex);
 
-            if (username == _username && password == _password)
+            var password =
+                credentials.Substring(
+                    separatorIndex + 1);
+
+            if (username == _username &&
+                password == _password)
             {
                 return true;
             }
         }
         catch
         {
-            // invalid auth header
+            // Invalid authorization header
         }
 
         Challenge(httpContext);
+
         return false;
     }
 
-    private static void Challenge(HttpContext httpContext)
+    private static void Challenge(
+        HttpContext httpContext
+    )
     {
-        httpContext.Response.Headers.WWWAuthenticate =
+        httpContext.Response
+            .Headers
+            .WWWAuthenticate =
             "Basic realm=\"Hangfire Dashboard\"";
 
         httpContext.Response.StatusCode =

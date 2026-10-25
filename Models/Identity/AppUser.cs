@@ -16,4 +16,7 @@ public class AppUser : IdentityUser<Guid>
 
     public ICollection<UserExternalIdentity> ExternalIdentities { get; set; }
         = new List<UserExternalIdentity>();
+
+    public ICollection<UserAddress> Addresses { get; set; }
+        = new List<UserAddress>();
 }

@@ -74,6 +74,7 @@ public sealed class TokenService
         {
             new(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
             new(ClaimTypes.NameIdentifier, user.Id.ToString()),
+            new("user_id", user.Id.ToString()),
             new(ClaimTypes.MobilePhone, user.PhoneNumber ?? string.Empty),
             new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString("N")),
         };

@@ -24,6 +24,8 @@ public class ApplicationDbContext
         UserExternalIdentities
         => Set<UserExternalIdentity>();
 
+    public DbSet<UserAddress> UserAddresses => Set<UserAddress>();
+
     public DbSet<Permission>
         Permissions
         => Set<Permission>();
