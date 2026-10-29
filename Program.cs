@@ -27,6 +27,8 @@ builder.Services.AddControllers();
 // ---------------------------------------------------------
 builder.Services.AddSwaggerGen(options =>
 {
+    options.OperationFilter<SwaggerAnonymousOperationFilter>();
+
     options.AddSecurityDefinition("bearer", new OpenApiSecurityScheme
     {
         Name = "Authorization",

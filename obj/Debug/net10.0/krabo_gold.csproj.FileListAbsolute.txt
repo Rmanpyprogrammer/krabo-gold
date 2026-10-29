@@ -160,7 +160,6 @@
 /home/arman/C#/krabo_gold/krabo-gold/bin/Debug/net10.0/zh/Hangfire.Core.resources.dll
 /home/arman/C#/krabo_gold/api-gateway/bin/Debug/net10.0/appsettings.Development.json
 /home/arman/C#/krabo_gold/api-gateway/bin/Debug/net10.0/krabo_gold.staticwebassets.endpoints.json
-/home/arman/C#/krabo_gold/api-gateway/bin/Debug/net10.0/appsettings.json
 /home/arman/C#/krabo_gold/api-gateway/bin/Debug/net10.0/krabo_gold
 /home/arman/C#/krabo_gold/api-gateway/bin/Debug/net10.0/krabo_gold.deps.json
 /home/arman/C#/krabo_gold/api-gateway/bin/Debug/net10.0/krabo_gold.runtimeconfig.json
@@ -318,3 +317,4 @@
 /home/arman/C#/krabo_gold/api-gateway/obj/Debug/net10.0/krabo_gold.pdb
 /home/arman/C#/krabo_gold/api-gateway/obj/Debug/net10.0/krabo_gold.genruntimeconfig.cache
 /home/arman/C#/krabo_gold/api-gateway/obj/Debug/net10.0/ref/krabo_gold.dll
+/home/arman/C#/krabo_gold/api-gateway/bin/Debug/net10.0/appsettings.json
