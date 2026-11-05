@@ -14,7 +14,7 @@ public sealed class GlobalRateLimitMiddleware
     private readonly HashSet<string> _trustedServiceIps;
     private readonly int _limit;
 
-    private const int WindowSeconds = 60;
+    private const int WindowSeconds = 1;
 
     private const string IncrementScript = """
         local count = redis.call('INCR', KEYS[1])
@@ -37,12 +37,12 @@ public sealed class GlobalRateLimitMiddleware
         _redis = redis.GetDatabase();
 
         _limit = configuration.GetValue<int>(
-            "RateLimiting:RequestsPerMinute", 120);
+            "RateLimiting:RequestsPerSecond", 15);
 
         if (_limit <= 0)
         {
             throw new InvalidOperationException(
-                "RateLimiting:RequestsPerMinute must be greater than zero.");
+                "RateLimiting:RequestsPerSecond must be greater than zero.");
         }
 
         var configuredIps = configuration

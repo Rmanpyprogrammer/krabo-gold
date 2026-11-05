@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("krabo_gold")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+49281f2653e1de8aea88f51187f9df310dc547da")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+0c0ed4488085cc2b839b063154e0f98db531297a")]
 [assembly: System.Reflection.AssemblyProductAttribute("krabo_gold")]
 [assembly: System.Reflection.AssemblyTitleAttribute("krabo_gold")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
